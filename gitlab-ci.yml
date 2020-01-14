@@ -1,0 +1,91 @@
+image: eroslab.cr.usgs.gov:4567/lsds/lpip/awstools:latest
+
+variables:
+    REGION: us-west-2
+    USER: Rizbi
+stages:
+    - build
+    - test
+    - deploy
+    - cleanup
+# ----------------------------------------------------------------------------------
+build-runner:
+    stage: build
+    extends:
+        - .build-tags
+        - .build-script
+    rules:
+        - if: '$REGION == "us-west-2" && $USER == "Rizbi"'
+          when: always
+test-runner:
+    stage: test
+    rules:
+        - if: '$REGION == "us-west-2" && $USER == "Rizbi"'
+          when: on_success
+    allow_failure: false
+    extends:
+        - .test-tags
+        - .test-script
+deploy-runner:
+    stage: deploy
+    rules:
+        - if: '$REGION == "us-west-2" && $USER == "Rizbi"'
+          when: manual
+    allow_failure: false
+    extends:
+        - .aws-before-script
+        - .deploy-script
+        - .deploy-tags
+clean-runner:
+    stage: cleanup
+    rules:
+        - if: '$REGION == "us-west-2" && $USER == "Rizbi"'
+          when: always
+    extends:
+        - .clean-tags
+        - .clean-script
+
+
+
+
+
+
+# ------------------------------------------------------------------------------------------
+.build-tags:
+    tags:
+        - dev
+        - aws
+        - docker
+.test-tags:
+    tags:
+        - dev
+        - docker
+        - aws
+.deploy-tags:
+    tags:
+        - dev
+        # - docker
+        - aws
+.clean-tags:
+    tags:
+        - dev
+        - docker
+        - aws
+.build-script:
+    script:
+        - echo "Hello from Rizbi"
+.test-script:
+    script:
+        - echo "testing 2nd step"
+.deploy-script:
+    script:
+        - echo "deploying"
+        - echo "the region is $REGION" 
+.clean-script:
+    script:
+        - echo "finishing up"
+
+.aws-before-script:
+    before_script:
+        - aws configure set default.region us-east-2
+        - echo "now the region is $REGION"
